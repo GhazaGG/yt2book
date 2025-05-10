@@ -10,14 +10,21 @@
   },
   "dependencies": {
     "@apollo/server": "^4.12.0",
+    "@as-integrations/next": "^3.2.0",
+    "@google/generative-ai": "^0.24.1",
+    "apollo-server-express": "^3.13.0",
+    "apollo-server-next": "^0.1.0",
     "axios": "^1.9.0",
     "graphql": "^16.11.0",
     "next": "15.3.2",
+    "pdf-lib": "^1.17.1",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "youtube-transcript": "^1.2.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/fs-capacitor": "^2.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
