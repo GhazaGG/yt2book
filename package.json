@@ -11,10 +11,12 @@
   "dependencies": {
     "@apollo/server": "^4.12.0",
     "@as-integrations/next": "^3.2.0",
-    "@google/generative-ai": "^0.24.1",
+    "@google/genai": "^0.2.0",
     "apollo-server-express": "^3.13.0",
+    "apollo-server-micro": "^3.13.0",
     "apollo-server-next": "^0.1.0",
     "axios": "^1.9.0",
+    "file-saver": "^2.0.5",
     "graphql": "^16.11.0",
     "next": "15.3.2",
     "pdf-lib": "^1.17.1",
@@ -24,6 +26,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/file-saver": "^2.0.7",
     "@types/fs-capacitor": "^2.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
