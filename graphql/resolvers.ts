@@ -6,6 +6,7 @@ interface Book {
     id: string;
     content: string;
     pdf: string;
+    title: string;
 }
 
 export const resolvers = {
@@ -28,11 +29,11 @@ export const resolvers = {
             }
 
             try {
-                // Fetch transcript
+                // Fetch transcript and video info
                 console.log('Fetching transcript for:', youtubeUrl);
-                const transcript = await fetchTranscript(youtubeUrl);
+                const videoInfo = await fetchTranscript(youtubeUrl);
                 
-                if (!transcript || transcript.trim().length === 0) {
+                if (!videoInfo.transcript || videoInfo.transcript.trim().length === 0) {
                     throw new Error('Failed to fetch transcript or transcript is empty');
                 }
 
@@ -46,7 +47,29 @@ export const resolvers = {
                 const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
                 const model = genAI.models.generateContent({
                     model: "gemini-2.0-flash",
-                    contents: `Ubah transcript youtube berikut menjadi seperti narasi buku yang menarik dan mudah dipahami. gunakan gaya penulisan seperti menulis buku personal development. hindari kalimat pendek dan kata-kata seperti 'katanya'. Transcript: ${transcript}`
+                    contents: `Transform this YouTube transcript into an engaging book chapter. Follow these guidelines:
+
+1. Write in a professional, engaging book style that flows naturally
+2. Create proper paragraphs and sections with clear transitions
+3. Use descriptive language and storytelling techniques
+4. Maintain the original message but make it more literary and engaging
+5. Add appropriate headings and subheadings to organize the content
+6. Include a brief introduction and conclusion
+7. Use varied sentence structures and rich vocabulary
+8. Make it feel like a well-written book chapter, not a transcript
+9. Keep all the important information but present it in a more engaging way
+10. Ensure the content is easy to read and understand
+11. DO NOT add any chapter numbers or "Chapter X" in the text
+12. DO NOT include the video title in the content - it will be added separately
+13. Focus on transforming the content into a flowing narrative
+
+Video Title: ${videoInfo.title}
+Channel: ${videoInfo.channelTitle}
+
+Here's the transcript to transform:
+${videoInfo.transcript}
+
+Please transform this into a well-structured book chapter that captures the essence while being engaging and professional. Remember: DO NOT add chapter numbers or include the video title in the content.`
                 });
 
                 // Generate content
@@ -58,14 +81,21 @@ export const resolvers = {
                     throw new Error('Failed to generate book content');
                 }
 
+                // Clean up the content to remove any unwanted chapter numbers
+                const cleanedContent = content
+                    .replace(/Chapter\s+\d+/gi, '')
+                    .replace(/^\d+\.\s*/gm, '')
+                    .trim();
+
                 // Generate PDF
                 console.log('Generating PDF');
-                const pdf = await generatePDF(content);
+                const pdf = await generatePDF(cleanedContent, `${videoInfo.title} - ${videoInfo.channelTitle}`);
 
                 return {
                     id: Date.now().toString(),
-                    content: content,
-                    pdf: pdf
+                    content: cleanedContent,
+                    pdf: pdf,
+                    title: `${videoInfo.title} - ${videoInfo.channelTitle}`
                 };
             } catch (error) {
                 console.error('Error in generateBook:', error);
