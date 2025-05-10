@@ -7,6 +7,7 @@ interface Book {
     content: string;
     pdf: string;
     title: string;
+    videoId: string;
 }
 
 export const resolvers = {
@@ -15,23 +16,26 @@ export const resolvers = {
     },
     Mutation: {
         generateBook: async (_:any, { youtubeUrl }: { youtubeUrl: string }): Promise<Book> => {
-            // Debug logging
-            console.log('Environment variables check:');
-            console.log('GEMINI_API_KEY exists:', !!process.env.GEMINI_API_KEY);
-            console.log('NEXT_PUBLIC_BASE_URL:', process.env.NEXT_PUBLIC_BASE_URL);
-
-            if (!youtubeUrl) {
-                throw new Error('YouTube URL is required');
-            }
-
-            if (!youtubeUrl.includes('youtube.com/watch')) {
-                throw new Error('Invalid YouTube URL format. Please provide a valid YouTube video URL');
-            }
-
             try {
+                // Debug logging
+                console.log('=== Starting Book Generation ===');
+                console.log('Input URL:', youtubeUrl);
+                console.log('Environment variables check:');
+                console.log('GEMINI_API_KEY exists:', !!process.env.GEMINI_API_KEY);
+                console.log('NEXT_PUBLIC_BASE_URL:', process.env.NEXT_PUBLIC_BASE_URL);
+
+                if (!youtubeUrl) {
+                    throw new Error('YouTube URL is required');
+                }
+
+                if (!youtubeUrl.includes('youtube.com/watch')) {
+                    throw new Error('Invalid YouTube URL format. Please provide a valid YouTube video URL');
+                }
+
                 // Fetch transcript and video info
-                console.log('Fetching transcript for:', youtubeUrl);
+                console.log('Step 1: Fetching transcript for:', youtubeUrl);
                 const videoInfo = await fetchTranscript(youtubeUrl);
+                console.log('Transcript fetched successfully');
                 
                 if (!videoInfo.transcript || videoInfo.transcript.trim().length === 0) {
                     throw new Error('Failed to fetch transcript or transcript is empty');
@@ -43,7 +47,7 @@ export const resolvers = {
                 }
 
                 // Initialize Gemini AI
-                console.log('Initializing Gemini AI');
+                console.log('Step 2: Initializing Gemini AI');
                 const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
                 const model = genAI.models.generateContent({
                     model: "gemini-2.0-flash",
@@ -73,9 +77,10 @@ Please transform this into a well-structured book chapter that captures the esse
                 });
 
                 // Generate content
-                console.log('Generating book content');
+                console.log('Step 3: Generating book content');
                 const result = await model;
                 const content = result.text;
+                console.log('Content generated successfully');
 
                 if (!content || content.trim().length === 0) {
                     throw new Error('Failed to generate book content');
@@ -88,18 +93,23 @@ Please transform this into a well-structured book chapter that captures the esse
                     .trim();
 
                 // Generate PDF
-                console.log('Generating PDF');
+                console.log('Step 4: Generating PDF');
                 const pdf = await generatePDF(cleanedContent, `${videoInfo.title} - ${videoInfo.channelTitle}`);
+                console.log('PDF generated successfully');
 
                 return {
                     id: Date.now().toString(),
                     content: cleanedContent,
                     pdf: pdf,
-                    title: `${videoInfo.title} - ${videoInfo.channelTitle}`
+                    title: `${videoInfo.title} - ${videoInfo.channelTitle}`,
+                    videoId: videoInfo.videoId
                 };
             } catch (error) {
-                console.error('Error in generateBook:', error);
+                console.error('=== Error in generateBook ===');
+                console.error('Error details:', error);
                 if (error instanceof Error) {
+                    console.error('Error message:', error.message);
+                    console.error('Error stack:', error.stack);
                     throw new Error(`Failed to generate book: ${error.message}`);
                 }
                 throw new Error('An unexpected error occurred while generating the book');

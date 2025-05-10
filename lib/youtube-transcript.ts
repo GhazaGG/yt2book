@@ -5,60 +5,78 @@ interface VideoInfo {
     transcript: string;
     title: string;
     channelTitle: string;
+    videoId: string;
 }
 
 export const fetchTranscript = async (url: string): Promise<VideoInfo> => {
-    // Debug environment variables
-    console.log('Environment variables in youtube-transcript.ts:');
-    console.log('YOUTUBE_API_KEY length:', process.env.YOUTUBE_API_KEY?.length || 0);
-    console.log('YOUTUBE_API_KEY first 4 chars:', process.env.YOUTUBE_API_KEY?.substring(0, 4) || 'none');
-    
-    // Extract video ID from URL
-    const videoId = url.split('v=')[1]?.split('&')[0];
-    if (!videoId) {
-        throw new Error('Invalid YouTube URL');
-    }
-
-    // Fetch transcript
-    const transcript = await YoutubeTranscript.fetchTranscript(url);
-    const transcriptText = transcript.map(entry => entry.text).join(' ');
-
-    // Fetch video details using YouTube Data API
     try {
-        // Debug logging
-        console.log('Using YouTube API Key:', process.env.YOUTUBE_API_KEY ? 'API Key exists' : 'API Key missing');
-        
-        if (!process.env.YOUTUBE_API_KEY) {
-            throw new Error('YouTube API Key is not defined in environment variables');
+        // Extract video ID from URL
+        const videoId = url.split('v=')[1]?.split('&')[0];
+        if (!videoId) {
+            throw new Error('Invalid YouTube URL');
         }
 
-        const apiUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${process.env.YOUTUBE_API_KEY}`;
-        console.log('Fetching video details from:', apiUrl);
-        
-        const response = await axios.get(apiUrl);
-        
-        if (!response.data.items || response.data.items.length === 0) {
-            throw new Error('Could not fetch video details');
+        console.log('Attempting to fetch transcript for video ID:', videoId);
+
+        // Fetch transcript first
+        try {
+            const transcript = await YoutubeTranscript.fetchTranscript(url);
+            console.log('Transcript fetched successfully, length:', transcript.length);
+            
+            if (!transcript || transcript.length === 0) {
+                throw new Error('This video does not have any captions/transcripts available. Please try a different video that has captions enabled.');
+            }
+
+            const transcriptText = transcript.map(entry => entry.text).join(' ');
+            console.log('Transcript text length:', transcriptText.length);
+
+            if (!transcriptText || transcriptText.trim().length === 0) {
+                throw new Error('Transcript text is empty after processing');
+            }
+
+            // Try to get video details if YouTube API key is available
+            let title = 'YouTube Video';
+            let channelTitle = 'YouTube Channel';
+
+            if (process.env.YOUTUBE_API_KEY) {
+                try {
+                    const apiUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${process.env.YOUTUBE_API_KEY}`;
+                    console.log('Fetching video details from:', apiUrl);
+                    
+                    const response = await axios.get(apiUrl);
+                    
+                    if (response.data.items && response.data.items.length > 0) {
+                        const videoDetails = response.data.items[0].snippet;
+                        title = videoDetails.title;
+                        channelTitle = videoDetails.channelTitle;
+                        console.log('Successfully fetched video details:', {
+                            title,
+                            channel: channelTitle
+                        });
+                    }
+                } catch (apiError) {
+                    console.warn('Could not fetch video details, using default values:', apiError);
+                    // Continue with default values
+                }
+            } else {
+                console.log('YouTube API key not found, using default values for title and channel');
+            }
+
+            return {
+                transcript: transcriptText,
+                title,
+                channelTitle,
+                videoId
+            };
+        } catch (transcriptError) {
+            console.error('Error fetching transcript:', transcriptError);
+            if (transcriptError instanceof Error && transcriptError.message.includes('Could not get the transcript')) {
+                throw new Error('This video does not have any captions/transcripts available. Please try a different video that has captions enabled.');
+            }
+            throw new Error(`Failed to fetch transcript: ${transcriptError instanceof Error ? transcriptError.message : 'Unknown error'}`);
         }
-
-        const videoDetails = response.data.items[0].snippet;
-        console.log('Successfully fetched video details:', {
-            title: videoDetails.title,
-            channel: videoDetails.channelTitle
-        });
-
-        return {
-            transcript: transcriptText,
-            title: videoDetails.title,
-            channelTitle: videoDetails.channelTitle
-        };
     } catch (error) {
-        console.error('Error fetching video details:', error);
-        // If we can't get the video details, return just the transcript
-        return {
-            transcript: transcriptText,
-            title: 'YouTube Video',
-            channelTitle: 'Unknown Channel'
-        };
+        console.error('Error in fetchTranscript:', error);
+        throw error;
     }
 }

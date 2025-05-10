@@ -3,9 +3,11 @@ import { gql } from 'apollo-server-micro';
 
 export const typeDefs = gql`
   type Book {
-    id: ID!
+    id: String!
     content: String!
     pdf: String!
+    title: String!
+    videoId: String!
   }
 
   type Query {
