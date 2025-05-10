@@ -1,36 +1,113 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# YouTube to Book Converter
 
-## Getting Started
+Transform YouTube videos into engaging narrative books using AI. This application takes a YouTube video URL, extracts its transcript, and uses Google's Gemini AI to convert it into a well-structured, engaging book chapter.
 
-First, run the development server:
+## 🚀 Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Convert YouTube videos to narrative books
+- Extract video transcripts automatically
+- AI-powered content transformation
+- Generate professional PDF books
+- Video preview with thumbnail
+- Clean, modern UI
+
+## 🛠️ Tech Stack
+
+- **Frontend:**
+  - Next.js 15
+  - React 19
+  - TailwindCSS
+  - Apollo Client
+  - File-Saver
+
+- **Backend:**
+  - Next.js API Routes
+  - GraphQL
+  - Apollo Server
+  - Google Gemini AI
+  - PDF-Lib
+
+- **APIs:**
+  - YouTube Data API (optional)
+  - Google Gemini AI API
+  - YouTube Transcript API
+
+## 🏗️ Project Structure
+
+```
+yt2book/
+├── app/                 # Next.js app directory
+├── components/          # React components
+├── graphql/            # GraphQL schema and resolvers
+├── lib/                # Utility functions
+│   ├── pdf-generator.ts
+│   ├── youtube-transcript.ts
+│   └── apollo-client.ts
+└── public/             # Static assets
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Getting Started
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Create a `.env.local` file with your API keys:
+   ```
+   GEMINI_API_KEY=your_gemini_api_key
+   YOUTUBE_API_KEY=your_youtube_api_key  # Optional
+   NEXT_PUBLIC_BASE_URL=http://localhost:3000
+   ```
+4. Run the development server:
+   ```bash
+   npm run dev
+   ```
+5. Open [http://localhost:3000](http://localhost:3000)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🔑 API Keys Required
 
-## Learn More
+- **Google Gemini AI API Key**: Required for content generation
+- **YouTube API Key**: Optional, used for video details and preview
 
-To learn more about Next.js, take a look at the following resources:
+## 🎯 Current Status
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- ✅ Basic video to book conversion
+- ✅ PDF generation
+- ✅ Video preview (when YouTube API key is available)
+- ✅ Error handling and user feedback
+- ✅ Responsive design
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🚧 In Progress
 
-## Deploy on Vercel
+- Improving error handling for missing transcripts
+- Enhancing PDF formatting
+- Optimizing AI prompts for better content generation
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🔮 Future Features
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [ ] Multiple book format support (EPUB, MOBI)
+- [ ] Custom book templates
+- [ ] Batch processing of multiple videos
+- [ ] User authentication
+- [ ] Save and manage generated books
+- [ ] Custom AI prompts
+- [ ] Book cover generation
+- [ ] Table of contents generation
+- [ ] Chapter organization
+- [ ] Export to different languages
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📝 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Google Gemini AI for content generation
+- YouTube Transcript API for video captions
+- PDF-Lib for PDF generation
+- Next.js team for the amazing framework
